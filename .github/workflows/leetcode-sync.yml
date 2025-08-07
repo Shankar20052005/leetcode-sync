@@ -1,0 +1,37 @@
+name: LeetCode Sync
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'  # Runs every 12 hours
+  workflow_dispatch:        # Allows manual run
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Sync LeetCode submissions
+        env:
+          LEETCODE_USER: ${{ secrets.LEETCODE_USER }}
+          LEETCODE_SESSION: ${{ secrets.LEETCODE_SESSION }}
+        run: |
+          python sync.py
+
+      - name: Commit and push
+        run: |
+          git config --global user.name "LeetCode Bot"
+          git config --global user.email "leetcode-bot@example.com"
+          git add .
+          git commit -m "Sync LeetCode submissions" || echo "No changes"
+          git push
